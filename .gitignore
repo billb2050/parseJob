@@ -1,0 +1,6 @@
+*.gz
+*.txt
+/backup
+/env
+
+

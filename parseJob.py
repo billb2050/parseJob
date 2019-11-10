@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
   This Python 3 CLI program reads the Hercules prt00e.txt from MVS
   (tk4- in my case) output which contains multiple jobs, back to back, 
@@ -31,6 +31,13 @@
 
   By: Bill Blasingim
   On: 10/29/2019
+
+prt002.txt (SYSOUT=X, when released),
+prt00e.txt (SYSOUT=A) 
+prt00f.txt (SYSOUT=Z) in folder tk4-/prt.
+
+  11/09/2019  Process prt00e and prt00f also.
+              Change open because of special characters in prt00f
   
 """
 import os, string, time
@@ -44,48 +51,59 @@ endCnt=0
 lastLine=0
 firstLine=1
 jobs = {}
-FILEIN = "prt00e.txt"
+#tmpFil=subdir+"tmp"+str(int(time.time()))+".txt"
+tmpFil="tmp"+str(int(time.time()))+".txt" #create temp workfile
+#CUUs=['00e','00f','002']
+CUUs=['00e','00f']
 
-fi = open(FILEIN, "r")
-#fo = open(FILEOUT, "w")
-# Create "jobs" subdirectory if it doesn't exist
-subdir="jobs"
-if not os.path.exists(subdir):
-    os.makedirs(subdir)
-tmpFil=subdir+"/tmp"+str(int(time.time()))+".txt"
-ln=0
-filCnt=0
-while 1:
-  line = fi.readline()
-  if not line: break
-  ln=ln+1
-  LineOut=line[:]
+for cuu in CUUs:
+  FILEIN = "prt"+cuu+".txt"
+  print("\nReading "+FILEIN)
+  alpha='A'
+  if FILEIN[5:6]=='f':
+    alpha='Z'
 
-  if start:
-    #print("Temp "+tmpFil)
-    fo = open(tmpFil, "w")
-    filCnt+=1
-    start=False
+  #fi = open(FILEIN, "r")
+  fi = open(FILEIN, "r", encoding = "ISO-8859-1")
+  # Create "jobs" subdirectory if it doesn't exist
+  subdir="jobs"+"-"+cuu+"/"
+  if not os.path.exists(subdir):
+      os.makedirs(subdir)
 
-  if LineOut[:12]=='****A  START':
-    endCnt=0
-    #print(LineOut)
-    job=LineOut[19:23]
-    jobName=LineOut[24:33]
-    timeDate=LineOut[67:88]
-    ofile=jobName.strip()+'-'+job.strip()+' ('+timeDate.strip()+').txt'
+  ln=0
+  filCnt=0
+  while 1:
+    line = fi.readline()
+    if not line: break
+    ln=ln+1
+    LineOut=line[:]
 
-  fo.write(LineOut)
+    if start:
+      fo = open(tmpFil, "w")
+      filCnt+=1
+      start=False
 
-  if LineOut[:11]=='****A   END':
-    endCnt+=1
-    lastLine=ln
-    if endCnt>3:
-      firstLine=lastLine+1
-      fo.close()
-      print("Wrote "+ofile)
-      os.rename(tmpFil, "jobs/"+ofile)
-      start=True
+    if LineOut[:12]=='****'+alpha+'  START':
+      endCnt=0
+      job=LineOut[17:23]
+      jobName=LineOut[24:33]
+      timeDate=LineOut[67:88]
+      # File name = job# then job name
+      ofile=job.strip()+'-'+jobName.strip()+' ('+timeDate.strip()+').txt'
+
+    fo.write(LineOut)
+
+    if LineOut[:11]=='****'+alpha+'   END':
+      endCnt+=1
+      lastLine=ln
+      if endCnt>3:
+        firstLine=lastLine+1
+        fo.close()
+        print("Wrote "+ofile)
+        os.rename(tmpFil, subdir+ofile)
+        start=True
+  print(str(ln) + " lines read.")
+  print(str(filCnt-1) + " Jobs written.")
 
 os.remove(tmpFil)      # Remove last temp file
 fi.close()
