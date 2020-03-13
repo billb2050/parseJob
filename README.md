@@ -1,6 +1,6 @@
   This Python 3 CLI program reads the Hercules prt00e.txt and prt00f.txt output which contains multiple jobs, back to back, and splits each job out to it's own file. It was written for use in the Linux OS. 
 
-  It opens the print files, read-only and can run while Hercules is active. There is could be a small likelihood that there could be problems reading if Hercules is writing. But only on output, not with the Hercules prt file so it's probably best run between Job execution.
+  It opens the print files, read-only and can run while Hercules is active. There is a small likelihood that there could be problems reading if Hercules is writing. But only on output, not with the Hercules prt file so it's probably best run between Job execution. However I've never had a problem.
 
   This program assumes there is a "jobs-00x" subdirectory for each prt file in the "prt" directory because that is where it writes the individual Job files. It will try to create it if it doesn't exist.
 
