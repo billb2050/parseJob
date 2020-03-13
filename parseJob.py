@@ -3,14 +3,16 @@
   This Python 3 CLI program reads the Hercules prt00e.txt from MVS
   (tk4- in my case) output which contains multiple jobs, back to back, 
   and splits each job out to it's own file. It was  written for use in
-  the Linux OS. 
+  the Linux OS, although I see no reason it wouldn't work in MS-Windows,
+  with the appropriate changes.
 
   It opens the print file, read-only and can run while Hercules is active.
   There is maybe a likelihood that there could be problems reading while
-  Hercules is writing. So it's probably best run between Job execution.
+  Hercules is writing. So it's probably best run between Job execution, 
+  however I've never had a problem.
 
   This program extracts the individual jobs into a "jobs" subdirectory, 
-  which It will create it if it doesn't exist in the "prt" directory. .
+  which It will create it if it doesn't exist in the "prt" directory.
 
   Files are named "JobName-JobNo (date&time).txt"
   
@@ -19,11 +21,11 @@
   makes some assumtions based on what was in my Hercules print file on 
   the day I wrote it. YMMV!
 
-  I store & run it in Hercules "prt" subdirectory. It can run in a terminal,
-  by typing './parseJob.py' in the Hercules prt directory, on my system you 
-  can also just double click it in the file manager within that directory. 
-  Obviously it must be set as executable. If you run it in a terminal it will
-  provide further information.
+  I store & run this program in Hercules "prt" subdirectory. It can run 
+  in a terminal, by typing './parseJob.py' in the Hercules prt directory, 
+  on my system you can also just double click it in the file manager within 
+  that directory. If you run it in a terminal it will provide record counts.
+  Obviously it must be set as executable. 
 
   It's fast
   Read a 7MB+, 80322 line prt file and wrote (extracted) 42 files (jobs)
@@ -38,6 +40,7 @@ prt00f.txt (SYSOUT=Z) in folder tk4-/prt.
 
   11/09/2019  Process prt00e and prt00f also.
               Change open because of special characters in prt00f
+  03/12/2020  Fix printed counts
   
 """
 import os, string, time
@@ -45,8 +48,6 @@ cr=chr(13)	# Carriage return
 lf=chr(10)	# Line Feed
 crlf=cr+lf
 nl="\n"	# New line
-start=True
-end=False
 endCnt=0
 lastLine=0
 firstLine=1
@@ -54,6 +55,7 @@ jobs = {}
 #tmpFil=subdir+"tmp"+str(int(time.time()))+".txt"
 tmpFil="tmp"+str(int(time.time()))+".txt" #create temp workfile
 #CUUs=['00e','00f','002']
+#CUUs=['00f','00e']
 CUUs=['00e','00f']
 
 for cuu in CUUs:
@@ -71,6 +73,8 @@ for cuu in CUUs:
       os.makedirs(subdir)
 
   ln=0
+  start=True
+  end=False
   filCnt=0
   while 1:
     line = fi.readline()
@@ -108,5 +112,3 @@ for cuu in CUUs:
 os.remove(tmpFil)      # Remove last temp file
 fi.close()
 fo.close()
-print(str(ln) + " lines read.")
-print(str(filCnt-1) + " Jobs written.")
