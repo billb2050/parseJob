@@ -41,9 +41,21 @@ prt00f.txt (SYSOUT=Z) in folder tk4-/prt.
   11/09/2019  Process prt00e and prt00f also.
               Change open because of special characters in prt00f
   03/12/2020  Fix printed counts
+  03/21/2020  Some filename date formatting. Mostly because I don't like the alpha month!
   
 """
 import os, string, time
+# Create a list of short month names
+months=[]
+months=["January","February","March","April","May","June","July","August","September","October","November","December"]
+monthShort=months
+i=0
+for month in months:
+    mnth=month[:3].upper()  #Just 1st 3 month letters
+    #print(mnth)
+    monthShort[i]=mnth
+    i+=1
+
 cr=chr(13)	# Carriage return
 lf=chr(10)	# Line Feed
 crlf=cr+lf
@@ -92,8 +104,21 @@ for cuu in CUUs:
       job=LineOut[17:23]
       jobName=LineOut[24:33]
       timeDate=LineOut[67:88]
+
+      '''
+      Some date formatting
+      Mostly because I don't like a alpha month
+      '''
+      pt=timeDate.find(".",3)
+      tim=timeDate[:pt+6]
+      dat=timeDate[pt+7:]
+      mnth=dat[3:6]
+      idx=monthShort.index(mnth)+1   #Get month number
+      dat='20'+dat[7:9]+"-"+str(idx)+"-"+dat[:2]
+      #dat='20'+dat[7:9]+str(idx)+dat[:2]
+
       # File name = job# then job name
-      ofile=job.strip()+'-'+jobName.strip()+' ('+timeDate.strip()+').txt'
+      ofile=job.strip()+'-'+jobName.strip()+' ('+dat+' '+tim+').txt'
 
     fo.write(LineOut)
 
