@@ -12,5 +12,5 @@ I had to add date & time because some Jobs with the same Job Number &  Job Name 
 
   This program makes some assumtions based on what was in my Hercules print  file on the days I wrote and tested it. YMMV!
 
-On my system it's fast...sub second.
+
 
